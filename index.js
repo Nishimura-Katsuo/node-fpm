@@ -20,7 +20,7 @@ let server = fcgi.createServer((req, res) => {
 
         if (typeof script !== 'function') {
             res.writeHead(404);
-            res.end();
+            res.end(`script ${scriptPath} does not export a function`);
         }
         else if (req.method === 'GET') {
             jsthread.spawn(script, { req, res, body: null }).then(ret => {
@@ -59,8 +59,11 @@ let server = fcgi.createServer((req, res) => {
         }
     } catch (err) {
         if (err.code === 'MODULE_NOT_FOUND') {
-            res.writeHead(404);
-            res.end();
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                err,
+                cgiParams: req.cgiParams,
+            }, null, ''));
         } else {
             res.writeHead(500);
             res.end(err.stack);
