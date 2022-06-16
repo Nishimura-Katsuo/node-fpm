@@ -1,0 +1,18 @@
+[Unit]
+Description=Node FCGI Server.
+After=network.target
+
+[Service]
+User=node-api
+Group=node-api
+ExecStart=/usr/bin/node /home/nishi/node-fpm/index.js
+WorkingDirectory=/home/nishi/node-fpm/
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=node-fpm
+
+[Install]
+WantedBy=multi-user.target
+
