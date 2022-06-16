@@ -23,7 +23,7 @@ let server = fcgi.createServer((req, res) => {
             res.end();
         }
         else if (req.method === 'GET') {
-            jsthread.spawn(script, req, res, null).then(ret => {
+            jsthread.spawn(script, { req, res, body: null }).then(ret => {
                 if (!res.headersSent) {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify(ret, null, ' '));
@@ -40,7 +40,7 @@ let server = fcgi.createServer((req, res) => {
 
             req.on('data', data => { body += data.toString(); });
             req.on('end', () => {
-                jsthread.spawn(script, req, res, body).then(ret => {
+                jsthread.spawn(script, { req, res, body }).then(ret => {
                     if (!res.headersSent) {
                         res.writeHead(200, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify(ret, null, ' '));
@@ -68,7 +68,7 @@ let server = fcgi.createServer((req, res) => {
     }
 });
 
-let socketName = path.resolve('/tmp', 'node-fcgi.sock');
+let args = process.argv.slice(2), socketName = args.length ? path.resolve('/tmp', args[0] + '.sock') : path.resolve('/tmp', 'node-fcgi.sock');
 
 if (fs.existsSync(socketName)) {
     fs.unlinkSync(socketName);
