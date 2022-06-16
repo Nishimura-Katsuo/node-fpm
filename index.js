@@ -5,7 +5,7 @@ const fcgi = require('node-fastcgi');
 const fs = require('fs');
 const path = require('path');
 
-let server = fcgi.createServer(function(req, res) {
+let server = fcgi.createServer((req, res) => {
     try {
         let scriptPath = req.cgiParams['SCRIPT_NAME'];
 
@@ -18,7 +18,11 @@ let server = fcgi.createServer(function(req, res) {
 
         let script = require(scriptPath);
 
-        if (req.method === 'GET') {
+        if (typeof script !== 'function') {
+            res.writeHead(404);
+            res.end();
+        }
+        else if (req.method === 'GET') {
             jsthread.spawn(script, req, res, null).then(ret => {
                 if (!res.headersSent) {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -32,10 +36,10 @@ let server = fcgi.createServer(function(req, res) {
                 res.end(err.stack);
             });
         } else if (req.method === 'POST') {
-            let body = "";
+            let body = '';
 
-            req.on('data', function(data) { body += data.toString(); });
-            req.on('end', function() {
+            req.on('data', data => { body += data.toString(); });
+            req.on('end', () => {
                 jsthread.spawn(script, req, res, body).then(ret => {
                     if (!res.headersSent) {
                         res.writeHead(200, { 'Content-Type': 'application/json' });
