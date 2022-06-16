@@ -1,4 +1,18 @@
+const cluster = require('cluster');
+
+if (cluster.isMaster) { // master code
+	console.log('Spawning children...');
+	cluster.fork(); // only fork once, this just allows the server to keep itself alive
+	cluster.on('exit', (worker /*, code, signal */) => {
+		console.log(`[${process.pid} @ ${new Date().toUTCString()}] Child ${worker.process.pid} died!`);
+		cluster.fork(); // if server dies fork a new thread
+	});
+
+    return;
+}
+
 require('@nishimura-katsuo/require-hot-reload').init();
+
 const jsthread = require('@nishimura-katsuo/jsthread');
 const mod = require('module');
 const fcgi = require('node-fastcgi');
