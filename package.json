@@ -1,0 +1,20 @@
+{
+  "name": "@nishimura-katsuo/node-fpm",
+  "version": "0.1.0",
+  "description": "A fcgi service inspired by php-fpm.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nishimura-Katsuo/node-fpm.git"
+  },
+  "author": "Nishimura-Katsuo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Nishimura-Katsuo/node-fpm/issues"
+  },
+  "homepage": "https://github.com/Nishimura-Katsuo/node-fpm#readme",
+  "dependencies": {
+    "@nishimura-katsuo/jsthread": "^1.0.0",
+    "@nishimura-katsuo/require-hot-reload": "^0.1.0"
+  }
+}
