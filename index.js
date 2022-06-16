@@ -32,7 +32,10 @@ let server = fcgi.createServer((req, res) => {
                     res.end(ret);
                 }
             }).catch(err => {
-                res.writeHead(500);
+                if (!res.headersSent) {
+                    res.writeHead(500);
+                }
+
                 res.end(err.stack);
             });
         } else if (req.method === 'POST') {
@@ -49,7 +52,10 @@ let server = fcgi.createServer((req, res) => {
                         res.end(ret);
                     }
                 }).catch(err => {
-                    res.writeHead(500);
+                    if (!res.headersSent) {
+                        res.writeHead(500);
+                    }
+
                     res.end(err.stack);
                 });
             });

@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/Nishimura-Katsuo/node-fpm#readme",
   "dependencies": {
-    "@nishimura-katsuo/jsthread": "^1.0.0",
+    "@nishimura-katsuo/jsthread": "^1.1.0",
     "@nishimura-katsuo/require-hot-reload": "^0.1.0",
     "node-fastcgi": "^1.3.3"
   }
