@@ -68,14 +68,13 @@ let server = fcgi.createServer((req, res) => {
     }
 });
 
-let args = process.argv.slice(2), socketName = args.length ? path.resolve('/tmp', args[0] + '.sock') : path.resolve('/tmp', 'node-fcgi.sock');
-
-if (fs.existsSync(socketName)) {
-    fs.unlinkSync(socketName);
-}
+let args = process.argv.slice(2), port = args.length ? args[0] : 4980;
 
 server.listen({
-    path: socketName,
+    host: 'localhost',
+    port,
     readableAll: true,
     writableAll: true,
 });
+
+console.log('Listening on port', port);
