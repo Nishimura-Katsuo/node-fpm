@@ -21,6 +21,9 @@ const path = require('path');
 
 let server = fcgi.createServer((req, res) => {
     try {
+        let startTime = process.hrtime.bigint();
+        req.startTime = startTime;
+
         let scriptPath = req.cgiParams['SCRIPT_NAME'];
 
         while (scriptPath[0] === '/') {
@@ -39,7 +42,7 @@ let server = fcgi.createServer((req, res) => {
         else if (req.method === 'GET') {
             jsthread.spawn(script, { req, res, body: null }).then(ret => {
                 if (!res.headersSent) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.writeHead(200, { 'Content-Type': 'application/json', 'x-request-duration': `${Number(process.hrtime.bigint() - startTime) / 1000000}ms` });
                     res.end(JSON.stringify(ret, null, ' '));
                 } else {
                     ret = ret.toString();
@@ -59,7 +62,7 @@ let server = fcgi.createServer((req, res) => {
             req.on('end', () => {
                 jsthread.spawn(script, { req, res, body }).then(ret => {
                     if (!res.headersSent) {
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.writeHead(200, { 'Content-Type': 'application/json', 'x-request-duration': `${Number(process.hrtime.bigint() - startTime) / 1000000}ms` });
                         res.end(JSON.stringify(ret, null, ' '));
                     } else {
                         ret = ret.toString();
@@ -79,13 +82,13 @@ let server = fcgi.createServer((req, res) => {
         }
     } catch (err) {
         if (err.code === 'MODULE_NOT_FOUND') {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.writeHead(404, { 'Content-Type': 'application/json', 'x-request-duration': `${Number(process.hrtime.bigint() - startTime) / 1000000}ms` });
             res.end(JSON.stringify({
                 err,
                 cgiParams: req.cgiParams,
             }, null, ''));
         } else {
-            res.writeHead(500);
+            res.writeHead(500, { 'Content-Type': 'text/plain', 'x-request-duration': `${Number(process.hrtime.bigint() - startTime) / 1000000}ms` });
             res.end(err.stack);
         }
     }
