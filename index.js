@@ -20,8 +20,9 @@ const fs = require('fs');
 const path = require('path');
 
 let server = fcgi.createServer((req, res) => {
+    let startTime = process.hrtime.bigint();
+
     try {
-        let startTime = process.hrtime.bigint();
         req.startTime = startTime;
 
         let scriptPath = req.cgiParams['SCRIPT_NAME'];
@@ -29,14 +30,20 @@ let server = fcgi.createServer((req, res) => {
         while (scriptPath[0] === '/') {
             scriptPath = scriptPath.slice(1);
         }
-
         scriptPath = path.resolve(req.cgiParams['DOCUMENT_ROOT'], scriptPath);
-        scriptPath = mod._resolveFilename(scriptPath, this, false);
+
+        try {
+            scriptPath = mod._resolveFilename(scriptPath, this, false);
+        } catch (err) {
+            res.writeHead(404);
+            res.end();
+            return;
+        }
 
         let script = require(scriptPath);
 
         if (typeof script !== 'function') {
-            res.writeHead(404);
+            res.writeHead(500);
             res.end(`script ${scriptPath} does not export a function`);
         }
         else if (req.method === 'GET') {
@@ -81,16 +88,8 @@ let server = fcgi.createServer((req, res) => {
             res.end();
         }
     } catch (err) {
-        if (err.code === 'MODULE_NOT_FOUND') {
-            res.writeHead(404, { 'Content-Type': 'application/json', 'x-request-duration': `${Number(process.hrtime.bigint() - startTime) / 1000000}ms` });
-            res.end(JSON.stringify({
-                err,
-                cgiParams: req.cgiParams,
-            }, null, ''));
-        } else {
-            res.writeHead(500, { 'Content-Type': 'text/plain', 'x-request-duration': `${Number(process.hrtime.bigint() - startTime) / 1000000}ms` });
-            res.end(err.stack);
-        }
+        res.writeHead(500, { 'Content-Type': 'text/plain', 'x-request-duration': `${Number(process.hrtime.bigint() - startTime) / 1000000}ms` });
+        res.end(err.stack);
     }
 });
 
